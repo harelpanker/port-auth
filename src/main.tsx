@@ -1,7 +1,8 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
 import type { Root } from "react-dom/client"
-import { AuthForm } from "@/components/AuthForm"
+import { SignUpForm } from "@/components/SignUpForm"
+import { LoginForm } from "@/components/LoginForm"
 import type { Region } from "@/lib/auth0-service"
 import "./index.css"
 
@@ -52,14 +53,22 @@ const PortAuth = {
     const root = createRoot(targetElement)
     activeRoots.set(targetElement, root)
 
+    const isLogin = options.mode === "logIn"
+
     root.render(
-      <AuthForm
-        initialEmail={options.initialEmail || ""}
-        initialMode={options.mode || "signUp"}
-        loginUrl={options.loginUrl || ""}
-        signupUrl={options.signupUrl || ""}
-        defaultRegion={options.defaultRegion || "US"}
-      />
+      isLogin ? (
+        <LoginForm
+          initialEmail={options.initialEmail || ""}
+          signupUrl={options.signupUrl || ""}
+          defaultRegion={options.defaultRegion || "US"}
+        />
+      ) : (
+        <SignUpForm
+          initialEmail={options.initialEmail || ""}
+          loginUrl={options.loginUrl || ""}
+          defaultRegion={options.defaultRegion || "US"}
+        />
+      )
     )
   },
 
@@ -103,7 +112,7 @@ if (document.getElementById("root")) {
         PortAuth.render({
           container: containerRef.current,
           mode: isLogin ? "logIn" : "signUp",
-          defaultRegion: "US", // US as default for both!
+          defaultRegion: "US", // US as default
           loginUrl: "/login",
           signupUrl: "/",
         })
@@ -123,57 +132,9 @@ if (document.getElementById("root")) {
       }
     }, [path])
 
-    const isLogin = path === "/login" || path.endsWith("/login")
-
     return (
-      <div className="min-h-screen bg-neutral-50 p-10 flex flex-col items-center justify-center">
-        <header className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-            Port Auth0 Embed Sandbox
-          </h1>
-          <p className="text-neutral-500 mt-2">
-            Simulating multi-page Webflow routing.
-          </p>
-          <div className="mt-4 flex gap-4 justify-center">
-            <a
-              href="/"
-              onClick={(e) => {
-                e.preventDefault()
-                window.history.pushState({}, "", "/")
-                setPath("/")
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
-                !isLogin
-                  ? "bg-black text-white border-black"
-                  : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50"
-              }`}
-            >
-              Sign Up Page (/)
-            </a>
-            <a
-              href="/login"
-              onClick={(e) => {
-                e.preventDefault()
-                window.history.pushState({}, "", "/login")
-                setPath("/login")
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
-                isLogin
-                  ? "bg-black text-white border-black"
-                  : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50"
-              }`}
-            >
-              Log In Page (/login)
-            </a>
-          </div>
-        </header>
-
-        <div className="w-full flex flex-col items-center">
-          <div className="mb-6 text-xs font-bold uppercase tracking-wider text-neutral-400 bg-white px-3 py-1 rounded-full shadow-xs border border-neutral-200">
-            Current Page: {isLogin ? "/login (Log In)" : "/ (Sign Up)"}
-          </div>
-          <div ref={containerRef} className="w-full flex justify-center" />
-        </div>
+      <div className="wrapper mx-auto flex min-h-screen w-full max-w-sm flex-col overflow-clip bg-white font-sans antialiased">
+        <div ref={containerRef} />
       </div>
     )
   }
