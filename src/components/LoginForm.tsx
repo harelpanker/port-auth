@@ -3,7 +3,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import type { Region } from "@/lib/auth0-service"
 import {
   loginWithGoogle,
-  loginWithCredentials,
+  loginWithRedirect,
   sendPasswordResetEmail,
 } from "@/lib/auth0-service"
 import { RegionToggle } from "./auth/RegionToggle"
@@ -23,10 +23,7 @@ export function LoginForm({
   defaultRegion = "US",
 }: LoginFormProps) {
   const [region, setRegion] = useState<Region>(defaultRegion)
-  const [step, setStep] = useState<1 | 2>(1)
   const [email, setEmail] = useState(initialEmail)
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -44,33 +41,7 @@ export function LoginForm({
     if (isForgotPassword) {
       handleForgotPasswordSubmit()
     } else {
-      setStep(2)
-    }
-  }
-
-  const handleCredentialsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-
-    if (!password || password.length < 8) {
-      setError("Password must be at least 8 characters long.")
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      await loginWithCredentials(region, email, password)
-    } catch (err: any) {
-      console.error(err)
-      let displayError = "An unexpected error occurred. Please try again."
-      if (err.description) {
-        displayError = err.description
-      } else if (err.message) {
-        displayError = err.message
-      }
-      setError(displayError)
-      setIsLoading(false)
+      loginWithRedirect(region, email)
     }
   }
 
@@ -125,8 +96,8 @@ export function LoginForm({
         </div>
       )}
 
-      {/* Step 1: Email Form */}
-      {step === 1 && !isForgotPassword && (
+      {/* Email Form */}
+      {!isForgotPassword && (
         <div className="flex w-full animate-in flex-col duration-200 fade-in">
           <BrandHeader title="Log in to Port" />
 
@@ -154,18 +125,31 @@ export function LoginForm({
             </Button>
           </form>
 
-          {signupUrl && (
-            <div className="my-4 text-sm text-black/60">
-              New to Port?{" "}
-              <button
-                type="button"
-                onClick={handleSignupClick}
-                className="cursor-pointer font-semibold text-black hover:underline"
-              >
-                Sign up
-              </button>
-            </div>
-          )}
+          <div className="my-4 flex w-full items-center justify-between text-sm text-black/60">
+            {signupUrl && (
+              <span>
+                New to Port?{" "}
+                <button
+                  type="button"
+                  onClick={handleSignupClick}
+                  className="cursor-pointer font-semibold text-black hover:underline"
+                >
+                  Sign up
+                </button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsForgotPassword(true)
+                setError(null)
+                setSuccessMessage(null)
+              }}
+              className="ml-auto cursor-pointer font-semibold text-black hover:underline"
+            >
+              Forgot password?
+            </button>
+          </div>
 
           {/* Divider */}
           <div className="mb-6 flex w-full items-center">
@@ -179,123 +163,9 @@ export function LoginForm({
         </div>
       )}
 
-      {/* Step 2: Password Form */}
-      {step === 2 && !isForgotPassword && (
-        <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
-          {/* Back Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setStep(1)
-              setError(null)
-            }}
-            className="absolute left-6 top-6 flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </button>
-
-          <BrandHeader
-            title="Enter your password"
-            description={
-              <>
-                Logging in as <span className="font-semibold">{email}</span>
-              </>
-            }
-          />
-
-          <form onSubmit={handleCredentialsSubmit} className="w-full mt-2">
-            <div className="w-full mb-4 text-left relative">
-              <label className="block text-sm font-medium text-neutral-500 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-4 pr-11 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-normal text-neutral-900 placeholder-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-xs"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer p-0.5"
-                >
-                  {showPassword ? (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4"
-                    >
-                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                      <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                      <line x1="2" y1="2" x2="22" y2="22" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4"
-                    >
-                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              <div className="text-right mt-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotPassword(true)
-                    setError(null)
-                    setSuccessMessage(null)
-                  }}
-                  className="text-xs font-semibold text-neutral-500 hover:text-neutral-900 hover:underline cursor-pointer"
-                >
-                  Forgot password?
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3.5 bg-neutral-950 hover:bg-neutral-800 active:translate-y-px transition-all rounded-xl text-white font-medium text-center text-sm cursor-pointer shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Please wait...</span>
-                </>
-              ) : (
-                "Log In"
-              )}
-            </button>
-          </form>
-        </div>
-      )}
-
       {/* Forgot Password View */}
       {isForgotPassword && (
         <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
-          {/* Back Button */}
           <button
             type="button"
             onClick={() => {

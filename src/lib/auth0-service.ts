@@ -36,6 +36,30 @@ export function getWebAuth(region: Region): auth0.WebAuth {
 }
 
 /**
+ * Redirects to Auth0's authorize endpoint for standard redirect-based login.
+ * Targets window.top so the entire page navigates when called from inside an iframe.
+ */
+export function loginWithRedirect(region: Region, loginHint?: string): void {
+  const config = REGION_CONFIGS[region]
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: config.clientId,
+    redirect_uri: config.redirectUri,
+    scope: "openid profile email",
+  })
+  if (loginHint) {
+    params.set("login_hint", loginHint)
+  }
+  const url = `https://${config.domain}/authorize?${params.toString()}`
+  try {
+    const target = window.top && window.top !== window ? window.top : window
+    target.location.href = url
+  } catch {
+    window.location.href = url
+  }
+}
+
+/**
  * Initiates the Google OAuth2 social login flow.
  * This will redirect the user to Auth0 which will immediately redirect to Google.
  */

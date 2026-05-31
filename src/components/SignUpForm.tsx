@@ -3,7 +3,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import type { Region } from "@/lib/auth0-service"
 import {
   loginWithGoogle,
-  loginWithCredentials,
+  loginWithRedirect,
   signupWithCredentials,
 } from "@/lib/auth0-service"
 import { RegionToggle } from "./auth/RegionToggle"
@@ -55,10 +55,8 @@ export function SignUpForm({
     setIsLoading(true)
 
     try {
-      // Step 1: Sign up in Auth0 Database
       await signupWithCredentials(region, email, password)
-      // Step 2: Log in immediately after successful signup
-      await loginWithCredentials(region, email, password)
+      loginWithRedirect(region, email)
     } catch (err: any) {
       console.error(err)
       let displayError = "An unexpected error occurred. Please try again."
