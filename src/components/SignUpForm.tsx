@@ -10,6 +10,7 @@ import { RegionToggle } from "./auth/RegionToggle"
 import { BrandHeader } from "./auth/BrandHeader"
 import { GoogleButton } from "./auth/GoogleButton"
 import { TermsDisclaimer } from "./auth/TermsDisclaimer"
+import { Button } from "./ui/button"
 
 interface SignUpFormProps {
   initialEmail?: string
@@ -101,42 +102,43 @@ export function SignUpForm({
 
       {/* Step 1: Email Form */}
       {step === 1 ? (
-        <div className="flex w-full animate-in flex-col items-center duration-200 fade-in">
+        <div className="flex w-full animate-in flex-col duration-200 fade-in">
           <BrandHeader
             title="Sign up to Port"
             description="Free forever, no trial period. Credit cards not required."
           />
 
-          <form onSubmit={handleEmailSubmit} className="mt-2 w-full">
-            <div className="mb-4 w-full text-left">
-              <label className="mb-1.5 block text-sm font-medium text-neutral-500">
-                Email address
-              </label>
+          <form
+            onSubmit={handleEmailSubmit}
+            className="flex w-full flex-col gap-y-4 pt-6"
+          >
+            <div className="flex w-full flex-col gap-y-2 text-left">
+              <label className="text-sm text-black/60">Email address</label>
               <input
                 type="email"
                 required
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-neutral-900 placeholder-neutral-400 shadow-xs transition-all outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                className="w-full rounded-xl border border-[#D3D3D3] bg-white px-4 py-3 text-sm placeholder-black/60 transition-all outline-none focus:border-black focus:ring-1 focus:ring-black"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-neutral-950 py-3.5 text-center text-sm font-medium text-white shadow-sm transition-all hover:bg-neutral-800 active:translate-y-px"
+              className="h-auto rounded-xl py-3.5 font-medium transition"
             >
               Continue
-            </button>
+            </Button>
           </form>
 
           {loginUrl && (
-            <div className="mt-4 text-sm font-normal text-neutral-600">
+            <div className="my-4 text-sm text-black/60">
               Already a user?{" "}
               <button
                 type="button"
                 onClick={handleLoginClick}
-                className="cursor-pointer font-semibold text-neutral-950 hover:underline"
+                className="cursor-pointer font-semibold text-black hover:underline"
               >
                 Log in
               </button>
@@ -144,12 +146,10 @@ export function SignUpForm({
           )}
 
           {/* Divider */}
-          <div className="my-6 flex w-full items-center">
-            <div className="flex-1 border-t border-neutral-100" />
-            <span className="px-4 text-[11px] font-semibold tracking-wider text-neutral-400">
-              OR
-            </span>
-            <div className="flex-1 border-t border-neutral-100" />
+          <div className="mb-6 flex w-full items-center">
+            <div className="flex-1 border-t border-[#E3E3E3]" />
+            <span className="px-4 text-sm text-black/60">OR</span>
+            <div className="flex-1 border-t border-[#E3E3E3]" />
           </div>
 
           {/* Google Login */}

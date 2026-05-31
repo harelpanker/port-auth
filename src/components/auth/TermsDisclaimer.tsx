@@ -1,10 +1,9 @@
-
 export function TermsDisclaimer() {
   return (
-    <p className="mt-8 text-xs text-neutral-400 text-center leading-relaxed font-normal max-w-[310px]">
+    <p className="mx-auto mt-8 max-w-[210px] text-center text-xs text-black/60">
       By signing up to Port, you accept our{" "}
       <a
-        href="https://www.getport.io/terms-of-service"
+        href="https://www.port.io/legal/terms-of-service"
         target="_blank"
         rel="noopener noreferrer"
         className="underline hover:text-neutral-600"
@@ -13,7 +12,7 @@ export function TermsDisclaimer() {
       </a>{" "}
       and{" "}
       <a
-        href="https://www.getport.io/privacy-policy"
+        href="https://www.port.io/legal/privacy-policy"
         target="_blank"
         rel="noopener noreferrer"
         className="underline hover:text-neutral-600"

@@ -9,6 +9,7 @@ import {
 import { RegionToggle } from "./auth/RegionToggle"
 import { BrandHeader } from "./auth/BrandHeader"
 import { GoogleButton } from "./auth/GoogleButton"
+import { Button } from "./ui/button"
 
 interface LoginFormProps {
   initialEmail?: string
@@ -106,10 +107,7 @@ export function LoginForm({
   }
 
   return (
-    <div
-      className="relative w-full max-w-[440px] bg-white rounded-[24px] border border-neutral-100 p-8 shadow-xs flex flex-col items-center mx-auto"
-      style={{ fontFamily: "'DM Sans Variable', sans-serif" }}
-    >
+    <div className="relative flex w-full flex-col px-9 py-10">
       {/* Region Selector */}
       <RegionToggle region={region} onChange={setRegion} />
 
@@ -129,39 +127,40 @@ export function LoginForm({
 
       {/* Step 1: Email Form */}
       {step === 1 && !isForgotPassword && (
-        <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
+        <div className="flex w-full animate-in flex-col duration-200 fade-in">
           <BrandHeader title="Log in to Port" />
 
-          <form onSubmit={handleEmailSubmit} className="w-full mt-2">
-            <div className="w-full mb-4 text-left">
-              <label className="block text-sm font-medium text-neutral-500 mb-1.5">
-                Email address
-              </label>
+          <form
+            onSubmit={handleEmailSubmit}
+            className="flex w-full flex-col gap-y-4 pt-6"
+          >
+            <div className="flex w-full flex-col gap-y-2 text-left">
+              <label className="text-sm text-black/60">Email address</label>
               <input
                 type="email"
                 required
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-normal text-neutral-900 placeholder-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-xs"
+                className="w-full rounded-xl border border-[#D3D3D3] bg-white px-4 py-3 text-sm placeholder-black/60 transition-all outline-none focus:border-black focus:ring-1 focus:ring-black"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="w-full py-3.5 bg-neutral-950 hover:bg-neutral-800 active:translate-y-px transition-all rounded-xl text-white font-medium text-center text-sm cursor-pointer shadow-sm flex items-center justify-center gap-2"
+              className="h-auto rounded-xl py-3.5 font-medium transition"
             >
               Continue
-            </button>
+            </Button>
           </form>
 
           {signupUrl && (
-            <div className="mt-4 text-sm font-normal text-neutral-600">
+            <div className="my-4 text-sm text-black/60">
               New to Port?{" "}
               <button
                 type="button"
                 onClick={handleSignupClick}
-                className="font-semibold text-neutral-950 hover:underline cursor-pointer"
+                className="cursor-pointer font-semibold text-black hover:underline"
               >
                 Sign up
               </button>
@@ -169,12 +168,10 @@ export function LoginForm({
           )}
 
           {/* Divider */}
-          <div className="w-full flex items-center my-6">
-            <div className="flex-1 border-t border-neutral-100" />
-            <span className="px-4 text-[11px] font-semibold text-neutral-400 tracking-wider">
-              OR
-            </span>
-            <div className="flex-1 border-t border-neutral-100" />
+          <div className="mb-6 flex w-full items-center">
+            <div className="flex-1 border-t border-[#E3E3E3]" />
+            <span className="px-4 text-sm text-black/60">OR</span>
+            <div className="flex-1 border-t border-[#E3E3E3]" />
           </div>
 
           {/* Google Login */}
@@ -316,25 +313,26 @@ export function LoginForm({
             description="Enter your email and we'll send you link instructions to reset your password."
           />
 
-          <form onSubmit={handleEmailSubmit} className="w-full mt-2">
-            <div className="w-full mb-4 text-left">
-              <label className="block text-sm font-medium text-neutral-500 mb-1.5">
-                Email address
-              </label>
+          <form
+            onSubmit={handleEmailSubmit}
+            className="flex w-full flex-col gap-y-4 pt-6"
+          >
+            <div className="flex w-full flex-col gap-y-2 text-left">
+              <label className="text-sm text-black/60">Email address</label>
               <input
                 type="email"
                 required
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-normal text-neutral-900 placeholder-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-xs"
+                className="w-full rounded-xl border border-[#D3D3D3] bg-white px-4 py-3 text-sm placeholder-black/60 transition-all outline-none focus:border-black focus:ring-1 focus:ring-black"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-neutral-950 hover:bg-neutral-800 active:translate-y-px transition-all rounded-xl text-white font-medium text-center text-sm cursor-pointer shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+              className="h-auto rounded-xl py-3.5 font-medium transition"
             >
               {isLoading ? (
                 <>
@@ -344,7 +342,7 @@ export function LoginForm({
               ) : (
                 "Send reset link"
               )}
-            </button>
+            </Button>
           </form>
         </div>
       )}

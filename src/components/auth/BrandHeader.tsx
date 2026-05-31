@@ -16,7 +16,7 @@ export function BrandHeader({ title, description }: BrandHeaderProps) {
       <div className="flex flex-col gap-y-3">
         <h2 className="text-2xl font-medium text-black/90">{title}</h2>
         {description && (
-          <div className="max-w-[288px] text-sm font-medium text-black/60">
+          <div className="mx-auto max-w-[288px] text-sm font-medium text-black/60">
             {description}
           </div>
         )}
