@@ -47,8 +47,8 @@ export function SignUpForm({
     e.preventDefault()
     setError(null)
 
-    if (!password || password.length < 8) {
-      setError("Password must be at least 8 characters long.")
+    if (!password || password.length < 12) {
+      setError("Password must be at least 12 characters long.")
       return
     }
 
@@ -62,7 +62,10 @@ export function SignUpForm({
     } catch (err: any) {
       console.error(err)
       let displayError = "An unexpected error occurred. Please try again."
-      if (err.description) {
+      if (err.code === "invalid_password" || err.name === "PasswordStrengthError") {
+        displayError =
+          "Password must be at least 12 characters and contain at least 3 of: uppercase letters, lowercase letters, numbers, special characters."
+      } else if (typeof err.description === "string") {
         displayError = err.description
       } else if (err.message) {
         displayError = err.message
