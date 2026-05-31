@@ -1,0 +1,126 @@
+import auth0 from "auth0-js"
+
+export type Region = "EU" | "US"
+
+export interface RegionConfig {
+  clientId: string
+  domain: string
+  redirectUri: string
+}
+
+export const REGION_CONFIGS: Record<Region, RegionConfig> = {
+  EU: {
+    clientId: "96IeqL36Q0UIBxIfV1oqOkDWU6UslfDj",
+    domain: "port-prod.eu.auth0.com",
+    redirectUri: "https://app.port.io",
+  },
+  US: {
+    clientId: "4lHUry3Gkds317lQ3JcgABh0JPbT3rWx",
+    domain: "port-prod.us.auth0.com",
+    redirectUri: "https://app.us.port.io",
+  },
+}
+
+/**
+ * Creates an instance of the Auth0 WebAuth client for a specific region.
+ */
+export function getWebAuth(region: Region): auth0.WebAuth {
+  const config = REGION_CONFIGS[region]
+  return new auth0.WebAuth({
+    domain: config.domain,
+    clientID: config.clientId,
+    redirectUri: config.redirectUri,
+    responseType: "code",
+    scope: "openid profile email",
+  })
+}
+
+/**
+ * Initiates the Google OAuth2 social login flow.
+ * This will redirect the user to Auth0 which will immediately redirect to Google.
+ */
+export function loginWithGoogle(region: Region): void {
+  const webAuth = getWebAuth(region)
+  webAuth.authorize({
+    connection: "google-oauth2",
+  })
+}
+
+/**
+ * Performs database-based credentials login using cross-origin authentication.
+ */
+export function loginWithCredentials(
+  region: Region,
+  email: string,
+  password: string
+): Promise<void> {
+  const webAuth = getWebAuth(region)
+  return new Promise((resolve, reject) => {
+    webAuth.login(
+      {
+        realm: "Username-Password-Authentication",
+        username: email,
+        password: password,
+      },
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
+
+/**
+ * Signs up a new user with email and password.
+ */
+export function signupWithCredentials(
+  region: Region,
+  email: string,
+  password: string
+): Promise<any> {
+  const webAuth = getWebAuth(region)
+  return new Promise((resolve, reject) => {
+    webAuth.signup(
+      {
+        connection: "Username-Password-Authentication",
+        email,
+        password,
+      },
+      (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(result)
+        }
+      }
+    )
+  })
+}
+
+/**
+ * Sends a password reset email to the user.
+ */
+export function sendPasswordResetEmail(
+  region: Region,
+  email: string
+): Promise<string> {
+  const webAuth = getWebAuth(region)
+  return new Promise((resolve, reject) => {
+    webAuth.changePassword(
+      {
+        connection: "Username-Password-Authentication",
+        email: email,
+      },
+      (err, resp) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(resp || "Password reset email sent")
+        }
+      }
+    )
+  })
+}
