@@ -63,9 +63,22 @@ export function SignUpForm({
       console.error(err)
       let displayError = "An unexpected error occurred. Please try again."
       if (err.code === "invalid_password" || err.name === "PasswordStrengthError") {
-        displayError =
-          "Password must be at least 12 characters and contain at least 3 of: uppercase letters, lowercase letters, numbers, special characters."
-      } else if (typeof err.description === "string") {
+        const rules: any[] = err.description?.rules ?? []
+        const failed = rules.filter((r: any) => !r.verified)
+        if (failed.length > 0) {
+          displayError = failed.map((r: any) => {
+            let msg: string = r.message ?? ""
+            ;(r.format ?? []).forEach((val: any) => {
+              msg = msg.replace("%d", String(val))
+            })
+            return msg
+          }).join(" ")
+        } else {
+          displayError = "Password is too weak. Please choose a stronger password."
+        }
+      } else if (typeof err.friendly_message === "string") {
+        displayError = err.friendly_message
+      } else if (typeof err.description === "string" && !err.description.includes("_")) {
         displayError = err.description
       } else if (err.message) {
         displayError = err.message
