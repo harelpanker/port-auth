@@ -15,12 +15,14 @@ interface LoginFormProps {
   initialEmail?: string
   signupUrl?: string
   defaultRegion?: Region
+  state?: Record<string, string>
 }
 
 export function LoginForm({
   initialEmail = "",
   signupUrl = "",
   defaultRegion = "US",
+  state,
 }: LoginFormProps) {
   const [region, setRegion] = useState<Region>(defaultRegion)
   const [email, setEmail] = useState(initialEmail)
@@ -41,7 +43,7 @@ export function LoginForm({
     if (isForgotPassword) {
       handleForgotPasswordSubmit()
     } else {
-      loginWithRedirect(region, email)
+      loginWithRedirect(region, email, state)
     }
   }
 
@@ -64,7 +66,7 @@ export function LoginForm({
   const handleGoogleLogin = () => {
     setError(null)
     try {
-      loginWithGoogle(region)
+      loginWithGoogle(region, state)
     } catch (err: any) {
       console.error(err)
       setError("Google Login initialization failed.")

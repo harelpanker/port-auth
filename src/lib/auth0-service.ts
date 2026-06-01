@@ -35,22 +35,18 @@ export function getWebAuth(region: Region): auth0.WebAuth {
   })
 }
 
-/**
- * Redirects to Auth0's authorize endpoint for standard redirect-based login.
- * Targets window.top so the entire page navigates when called from inside an iframe.
- */
-export function loginWithRedirect(region: Region, loginHint?: string): void {
-  const config = REGION_CONFIGS[region]
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: config.clientId,
-    redirect_uri: config.redirectUri,
-    scope: "openid profile email",
+function buildState(state?: Record<string, string>): string | null {
+  const iframeParams: Record<string, string> = {}
+  new URLSearchParams(window.location.search).forEach((value, key) => {
+    iframeParams[key] = value
   })
-  if (loginHint) {
-    params.set("login_hint", loginHint)
-  }
-  const url = `https://${config.domain}/authorize?${params.toString()}`
+  const merged = { ...iframeParams, ...state }
+  return Object.keys(merged).length > 0
+    ? new URLSearchParams(merged).toString()
+    : null
+}
+
+function redirectTop(url: string): void {
   try {
     const target = window.top && window.top !== window ? window.top : window
     target.location.href = url
@@ -60,11 +56,37 @@ export function loginWithRedirect(region: Region, loginHint?: string): void {
 }
 
 /**
+ * Redirects to Auth0's authorize endpoint for standard redirect-based login.
+ * Targets window.top so the entire page navigates when called from inside an iframe.
+ * Automatically includes the iframe's current URL params in the state.
+ */
+export function loginWithRedirect(
+  region: Region,
+  loginHint?: string,
+  state?: Record<string, string>
+): void {
+  const config = REGION_CONFIGS[region]
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: config.clientId,
+    redirect_uri: config.redirectUri,
+    scope: "openid profile email",
+  })
+  if (loginHint) params.set("login_hint", loginHint)
+  const builtState = buildState(state)
+  if (builtState) params.set("state", builtState)
+  redirectTop(`https://${config.domain}/authorize?${params.toString()}`)
+}
+
+/**
  * Initiates the Google OAuth2 social login flow.
  * Targets window.top so the entire page navigates when called from inside an iframe.
- * Google blocks OAuth flows that originate from iframes.
+ * Automatically includes the iframe's current URL params in the state.
  */
-export function loginWithGoogle(region: Region): void {
+export function loginWithGoogle(
+  region: Region,
+  state?: Record<string, string>
+): void {
   const config = REGION_CONFIGS[region]
   const params = new URLSearchParams({
     response_type: "code",
@@ -73,13 +95,9 @@ export function loginWithGoogle(region: Region): void {
     scope: "openid profile email",
     connection: "google-oauth2",
   })
-  const url = `https://${config.domain}/authorize?${params.toString()}`
-  try {
-    const target = window.top && window.top !== window ? window.top : window
-    target.location.href = url
-  } catch {
-    window.location.href = url
-  }
+  const builtState = buildState(state)
+  if (builtState) params.set("state", builtState)
+  redirectTop(`https://${config.domain}/authorize?${params.toString()}`)
 }
 
 /**

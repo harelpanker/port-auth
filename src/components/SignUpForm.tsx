@@ -16,12 +16,14 @@ interface SignUpFormProps {
   initialEmail?: string
   loginUrl?: string
   defaultRegion?: Region
+  state?: Record<string, string>
 }
 
 export function SignUpForm({
   initialEmail = "",
   loginUrl = "",
   defaultRegion = "US",
+  state,
 }: SignUpFormProps) {
   const [region, setRegion] = useState<Region>(defaultRegion)
   const [step, setStep] = useState<1 | 2>(1)
@@ -56,7 +58,7 @@ export function SignUpForm({
 
     try {
       await signupWithCredentials(region, email, password)
-      loginWithRedirect(region, email)
+      loginWithRedirect(region, email, state)
     } catch (err: any) {
       console.error(err)
       let displayError = "An unexpected error occurred. Please try again."
@@ -89,7 +91,7 @@ export function SignUpForm({
   const handleGoogleLogin = () => {
     setError(null)
     try {
-      loginWithGoogle(region)
+      loginWithGoogle(region, state)
     } catch (err: any) {
       console.error(err)
       setError("Google Login initialization failed.")

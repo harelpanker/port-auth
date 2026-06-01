@@ -15,6 +15,7 @@ interface RenderOptions {
   initialEmail?: string
   loginUrl?: string
   signupUrl?: string
+  state?: Record<string, string>
 }
 
 // Expose PortAuth globally
@@ -61,12 +62,14 @@ const PortAuth = {
           initialEmail={options.initialEmail || ""}
           signupUrl={options.signupUrl || ""}
           defaultRegion={options.defaultRegion || "US"}
+          state={options.state}
         />
       ) : (
         <SignUpForm
           initialEmail={options.initialEmail || ""}
           loginUrl={options.loginUrl || ""}
           defaultRegion={options.defaultRegion || "US"}
+          state={options.state}
         />
       )
     )
