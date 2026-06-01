@@ -61,13 +61,25 @@ export function loginWithRedirect(region: Region, loginHint?: string): void {
 
 /**
  * Initiates the Google OAuth2 social login flow.
- * This will redirect the user to Auth0 which will immediately redirect to Google.
+ * Targets window.top so the entire page navigates when called from inside an iframe.
+ * Google blocks OAuth flows that originate from iframes.
  */
 export function loginWithGoogle(region: Region): void {
-  const webAuth = getWebAuth(region)
-  webAuth.authorize({
+  const config = REGION_CONFIGS[region]
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: config.clientId,
+    redirect_uri: config.redirectUri,
+    scope: "openid profile email",
     connection: "google-oauth2",
   })
+  const url = `https://${config.domain}/authorize?${params.toString()}`
+  try {
+    const target = window.top && window.top !== window ? window.top : window
+    target.location.href = url
+  } catch {
+    window.location.href = url
+  }
 }
 
 /**
