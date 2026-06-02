@@ -17,7 +17,7 @@ export const REGION_CONFIGS: Record<Region, RegionConfig> = {
   US: {
     clientId: "4lHUry3Gkds317lQ3JcgABh0JPbT3rWx",
     domain: "port-prod.us.auth0.com",
-    redirectUri: "https://app.stg-01.port.io",
+    redirectUri: "https://app.us.port.io",
   },
 }
 
