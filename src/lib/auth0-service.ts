@@ -37,10 +37,16 @@ export function getWebAuth(region: Region): auth0.WebAuth {
   })
 }
 
+function appendExtParams(params: URLSearchParams): void {
+  new URLSearchParams(window.location.search).forEach((value, key) => {
+    if (key.startsWith("ext-")) params.set(key, value)
+  })
+}
+
 function buildState(state?: Record<string, string>): string | null {
   const iframeParams: Record<string, string> = {}
   new URLSearchParams(window.location.search).forEach((value, key) => {
-    if (!key.startsWith("ext-")) iframeParams[key] = value
+    iframeParams[key] = value
   })
   const merged = { ...iframeParams, ...state }
   return Object.keys(merged).length > 0
@@ -75,6 +81,7 @@ export function loginWithRedirect(
     scope: "openid profile email",
   })
   if (loginHint) params.set("login_hint", loginHint)
+  appendExtParams(params)
   const builtState = buildState(state)
   if (builtState) params.set("state", builtState)
   redirectTop(`https://${config.domain}/authorize?${params.toString()}`)
@@ -97,6 +104,7 @@ export function loginWithGoogle(
     scope: "openid profile email",
     connection: "google-oauth2",
   })
+  appendExtParams(params)
   const builtState = buildState(state)
   if (builtState) params.set("state", builtState)
   redirectTop(`https://${config.domain}/authorize?${params.toString()}`)
