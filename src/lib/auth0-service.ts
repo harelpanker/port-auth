@@ -10,14 +10,14 @@ export interface RegionConfig {
 
 export const REGION_CONFIGS: Record<Region, RegionConfig> = {
   EU: {
-    clientId: "96IeqL36Q0UIBxIfV1oqOkDWU6UslfDj",
-    domain: "port-prod.eu.auth0.com",
-    redirectUri: "https://app.port.io",
+    clientId: "dAea4bpVXnr0ohLCdLKWgIgtC22sSSWl",
+    domain: "auth.staging.getport.io",
+    redirectUri: "https://app.stg-01.port.io",
   },
   US: {
-    clientId: "4lHUry3Gkds317lQ3JcgABh0JPbT3rWx",
-    domain: "port-prod.us.auth0.com",
-    redirectUri: "https://app.us.port.io",
+    clientId: "dAea4bpVXnr0ohLCdLKWgIgtC22sSSWl",
+    domain: "auth.staging.getport.io",
+    redirectUri: "https://app.stg-01.port.io",
   },
 }
 
@@ -30,7 +30,7 @@ export function getWebAuth(region: Region): auth0.WebAuth {
     domain: config.domain,
     clientID: config.clientId,
     redirectUri: config.redirectUri,
-    responseType: "code",
+    responseType: "token",
     scope: "openid profile email",
   })
 }
@@ -67,7 +67,7 @@ export function loginWithRedirect(
 ): void {
   const config = REGION_CONFIGS[region]
   const params = new URLSearchParams({
-    response_type: "code",
+    response_type: "token",
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: "openid profile email",
@@ -89,7 +89,7 @@ export function loginWithGoogle(
 ): void {
   const config = REGION_CONFIGS[region]
   const params = new URLSearchParams({
-    response_type: "code",
+    response_type: "token",
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: "openid profile email",
