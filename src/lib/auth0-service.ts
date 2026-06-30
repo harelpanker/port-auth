@@ -21,6 +21,8 @@ export const REGION_CONFIGS: Record<Region, RegionConfig> = {
   },
 }
 
+// auth0.loginWithPopup({ authorizationParams: { 'ext-my_custom_param': 'your_custom_value' } });
+
 /**
  * Creates an instance of the Auth0 WebAuth client for a specific region.
  */
@@ -38,7 +40,7 @@ export function getWebAuth(region: Region): auth0.WebAuth {
 function buildState(state?: Record<string, string>): string | null {
   const iframeParams: Record<string, string> = {}
   new URLSearchParams(window.location.search).forEach((value, key) => {
-    iframeParams[key] = value
+    if (!key.startsWith("ext-")) iframeParams[key] = value
   })
   const merged = { ...iframeParams, ...state }
   return Object.keys(merged).length > 0
