@@ -3,7 +3,6 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import type { Region } from "@/lib/auth0-service"
 import {
   loginWithGoogle,
-  loginWithRedirect,
   signupWithCredentials,
 } from "@/lib/auth0-service"
 import { RegionToggle } from "./auth/RegionToggle"
@@ -17,6 +16,24 @@ interface SignUpFormProps {
   loginUrl?: string
   defaultRegion?: Region
   state?: Record<string, string>
+}
+
+interface PasswordRule {
+  verified?: boolean
+  message?: string
+  format?: unknown[]
+}
+
+interface AuthErrorLike {
+  code?: string
+  name?: string
+  description?: string | { rules?: PasswordRule[] }
+  friendly_message?: string
+  message?: string
+}
+
+function isAuthErrorLike(err: unknown): err is AuthErrorLike {
+  return typeof err === "object" && err !== null
 }
 
 export function SignUpForm({
@@ -57,18 +74,25 @@ export function SignUpForm({
     setIsLoading(true)
 
     try {
-      await signupWithCredentials(region, email, password)
-      loginWithRedirect(region, email, state)
-    } catch (err: any) {
+      await signupWithCredentials(region, email, password, state)
+    } catch (err: unknown) {
       console.error(err)
+      const authError = isAuthErrorLike(err) ? err : {}
       let displayError = "An unexpected error occurred. Please try again."
-      if (err.code === "invalid_password" || err.name === "PasswordStrengthError") {
-        const rules: any[] = err.description?.rules ?? []
-        const failed = rules.filter((r: any) => !r.verified)
+      if (
+        authError.code === "invalid_password" ||
+        authError.name === "PasswordStrengthError"
+      ) {
+        const rules =
+          typeof authError.description === "object"
+            ? (authError.description.rules ?? [])
+            : []
+        const failed = rules.filter((r) => !r.verified)
         if (failed.length > 0) {
-          displayError = failed.map((r: any) => {
+          displayError = failed.map((r) => {
             let msg: string = r.message ?? ""
-            ;(r.format ?? []).forEach((val: any) => {
+            const format = r.format ?? []
+            format.forEach((val) => {
               msg = msg.replace("%d", String(val))
             })
             return msg
@@ -76,12 +100,15 @@ export function SignUpForm({
         } else {
           displayError = "Password is too weak. Please choose a stronger password."
         }
-      } else if (typeof err.friendly_message === "string") {
-        displayError = err.friendly_message
-      } else if (typeof err.description === "string" && !err.description.includes("_")) {
-        displayError = err.description
-      } else if (err.message) {
-        displayError = err.message
+      } else if (typeof authError.friendly_message === "string") {
+        displayError = authError.friendly_message
+      } else if (
+        typeof authError.description === "string" &&
+        !authError.description.includes("_")
+      ) {
+        displayError = authError.description
+      } else if (authError.message) {
+        displayError = authError.message
       }
       setError(displayError)
       setIsLoading(false)
@@ -92,7 +119,7 @@ export function SignUpForm({
     setError(null)
     try {
       loginWithGoogle(region, state)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
       setError("Google Login initialization failed.")
     }
