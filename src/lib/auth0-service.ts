@@ -21,8 +21,6 @@ export const REGION_CONFIGS: Record<Region, RegionConfig> = {
   },
 }
 
-// auth0.loginWithPopup({ authorizationParams: { 'ext-my_custom_param': 'your_custom_value' } });
-
 /**
  * Creates an instance of the Auth0 WebAuth client for a specific region.
  */
@@ -37,10 +35,34 @@ export function getWebAuth(region: Region): auth0.WebAuth {
   })
 }
 
-function appendExtParams(params: URLSearchParams): void {
+function normalizeExtValue(value: string): string {
+  return value === "" ? "true" : value
+}
+
+function getExtParams(): Record<`ext-${string}`, string> {
+  const extParams: Record<`ext-${string}`, string> = {}
   new URLSearchParams(window.location.search).forEach((value, key) => {
-    if (key.startsWith("ext-")) params.set(key, value)
+    if (key.startsWith("ext-")) {
+      extParams[key as `ext-${string}`] = normalizeExtValue(value)
+    }
   })
+  return extParams
+}
+
+function appendExtParams(params: URLSearchParams): void {
+  Object.entries(getExtParams()).forEach(([key, value]) => {
+    params.set(key, value)
+  })
+}
+
+function buildSignupUserMetadata(): Record<string, string> | undefined {
+  const metadata: Record<string, string> = {}
+  Object.entries(getExtParams()).forEach(([key, value]) => {
+    const metadataKey = key.slice("ext-".length).replaceAll("-", "_")
+    if (metadataKey) metadata[metadataKey] = value
+  })
+
+  return Object.keys(metadata).length > 0 ? metadata : undefined
 }
 
 function buildState(state?: Record<string, string>): string | null {
@@ -138,29 +160,53 @@ export function loginWithCredentials(
 }
 
 /**
- * Signs up a new user with email and password.
+ * Signs up a new user and starts the Auth0 session before redirecting.
  */
 export function signupWithCredentials(
   region: Region,
   email: string,
-  password: string
-): Promise<any> {
+  password: string,
+  state?: Record<string, string>
+): Promise<unknown> {
   const webAuth = getWebAuth(region)
   return new Promise((resolve, reject) => {
-    webAuth.signup(
-      {
-        connection: "Username-Password-Authentication",
-        email,
+    const signupOptions: auth0.DbSignUpOptions = {
+      connection: "Username-Password-Authentication",
+      email,
+      password,
+    }
+    const userMetadata = buildSignupUserMetadata()
+    if (userMetadata) signupOptions.userMetadata = userMetadata
+    const builtState = buildState(state)
+    if (builtState) {
+      const signupOptionsWithState = signupOptions as auth0.DbSignUpOptions & {
+        state: string
+      }
+      signupOptionsWithState.state = builtState
+    }
+
+    webAuth.signup(signupOptions, (err) => {
+      if (err) {
+        return reject(err)
+      }
+
+      const loginOptions: auth0.CrossOriginLoginOptions &
+        Record<`ext-${string}`, string> = {
+        realm: "Username-Password-Authentication",
+        username: email,
         password,
-      },
-      (err, result) => {
-        if (err) {
-          reject(err)
+        ...getExtParams(),
+      }
+      if (builtState) loginOptions.state = builtState
+
+      webAuth.login(loginOptions, (loginErr, result) => {
+        if (loginErr) {
+          reject(loginErr)
         } else {
           resolve(result)
         }
-      }
-    )
+      })
+    })
   })
 }
 
