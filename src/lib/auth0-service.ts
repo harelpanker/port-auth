@@ -10,12 +10,12 @@ export interface RegionConfig {
 
 export const REGION_CONFIGS: Record<Region, RegionConfig> = {
   EU: {
-    clientId: "dAea4bpVXnr0ohLCdLKWgIgtC22sSSWl",
+    clientId: "96IeqL36Q0UIBxIfV1oqOkDWU6UslfDj",
     domain: "auth.getport.io",
     redirectUri: "https://app.port.io",
   },
   US: {
-    clientId: "dAea4bpVXnr0ohLCdLKWgIgtC22sSSWl",
+    clientId: "4lHUry3Gkds317lQ3JcgABh0JPbT3rWx",
     domain: "auth.us.getport.io",
     redirectUri: "https://app.us.port.io",
   },
