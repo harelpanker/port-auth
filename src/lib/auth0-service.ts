@@ -169,6 +169,18 @@ export function signupWithCredentials(
   state?: Record<string, string>
 ): Promise<unknown> {
   const webAuth = getWebAuth(region)
+
+  // auth0-js finishes cross-origin login by navigating the current window to
+  // `/authorize`. Inside an iframe that only redirects the iframe. Override
+  // `authorize` so the parent (top) window is redirected to the app instead.
+  webAuth.authorize = (options: auth0.AuthorizeOptions) => {
+    redirectTop(
+      webAuth.client.buildAuthorizeUrl(
+        options as unknown as auth0.AuthorizeUrlOptions
+      )
+    )
+  }
+
   return new Promise((resolve, reject) => {
     const signupOptions: auth0.DbSignUpOptions = {
       connection: "Username-Password-Authentication",
